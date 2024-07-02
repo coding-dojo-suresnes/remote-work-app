@@ -1,0 +1,30 @@
+{
+  "name": "hexa-semano",
+  "version": "1.0.0",
+  "description": "Remote work application with hexagonal architecture",
+  "main": "src/main.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "ts-node src/main.ts",
+    "lint": "eslint src --ext .ts",
+    "test": "jest "
+  },
+  "license": "MIT",
+  "dependencies": {
+    "jest-mock-extended": "^3.0.7"
+  },
+  "devDependencies": {
+    "@babel/preset-typescript": "^7.23.3",
+    "@gads-citron/eslint-config-citron": "^3.0.1",
+    "@jest/globals": "^29.7.0",
+    "@types/jest": "^29.5.12",
+    "@typescript-eslint/eslint-plugin": "^7.0.1",
+    "@typescript-eslint/parser": "^7.0.1",
+    "eslint": "^8.56.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.2.5",
+    "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.0.0"
+  }
+}
