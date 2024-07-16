@@ -4,12 +4,15 @@ import express, { Express } from 'express';
 
 import { IRemoteWorkApp, UserWorkSituation } from '../../domain';
 
-export class RemoteWorkServer implements IRemoteWorkApp {
+export class RemoteWorkServer {
   private server: Express;
 
   private httpServer!: Server;
 
-  constructor(private readonly port = 3000) {
+  constructor(
+    private readonly remoteWorkApp: IRemoteWorkApp,
+    private readonly port = 3000,
+  ) {
     this.server = express();
     this.setupRoutes();
   }

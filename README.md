@@ -19,5 +19,5 @@
 
 ## Next steps
 
-- Refactor the server so that it uses a RemoteWorkApp. Reflect on the necessity for the server to implement the IRemoteWorkApp interface.
+- Refactor the server so that it uses a RemoteWorkApp.
 - continue tests for /user-presence

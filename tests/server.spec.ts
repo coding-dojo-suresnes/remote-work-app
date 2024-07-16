@@ -1,9 +1,12 @@
+import { mock } from 'jest-mock-extended';
 import supertest from 'supertest';
 
+import { IUserWorkSituationPort, RemoteWorkApp } from '../src/domain';
 import { RemoteWorkServer } from '../src/infra/adapter/remote-work-server';
 
 describe('Rest API server', () => {
-  const app = new RemoteWorkServer();
+  const repoMock = mock<IUserWorkSituationPort>();
+  const app = new RemoteWorkServer(new RemoteWorkApp(repoMock));
   afterEach(() => {
     app.stop();
   });
