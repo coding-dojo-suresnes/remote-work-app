@@ -16,8 +16,6 @@
 - 2024-06-18: Add date to isUserInOffice feature
 - 2024-06-18: Implement adapter for user-presence.port
 - 2024-07-02: Create server adapter using express
+- 2024-07-16: Refactor the server so that it uses a RemoteWorkApp, continue tests for /user-presence
 
 ## Next steps
-
-- Refactor the server so that it uses a RemoteWorkApp.
-- continue tests for /user-presence

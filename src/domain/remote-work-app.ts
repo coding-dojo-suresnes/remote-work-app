@@ -2,18 +2,20 @@ import { IRemoteWorkApp, IUserWorkSituationPort } from './ports';
 import { UserWorkSituation } from './user-work-situation.entity';
 
 export class RemoteWorkApp implements IRemoteWorkApp {
-  constructor(private readonly userPresencePort: IUserWorkSituationPort) {}
+  constructor(
+    private readonly userPresenceRepository: IUserWorkSituationPort,
+  ) {}
 
   getUserWorkSituation(
     username: string,
     date: Date,
   ): Promise<UserWorkSituation> {
-    return this.userPresencePort.getUserWorkSituation(username, date);
+    return this.userPresenceRepository.getUserWorkSituation(username, date);
   }
 
   public async isUserInOffice(username: string, date: Date): Promise<boolean> {
     const workSituation: UserWorkSituation =
-      await this.userPresencePort.getUserWorkSituation(username, date);
+      await this.userPresenceRepository.getUserWorkSituation(username, date);
     switch (workSituation) {
       case UserWorkSituation.IN_OFFICE:
         return true;

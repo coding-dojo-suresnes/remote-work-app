@@ -17,15 +17,11 @@ export class RemoteWorkServer {
     this.setupRoutes();
   }
 
-  isUserInOffice(username: string, date: Date): Promise<boolean> {
-    throw new Error('Method not implemented.');
-  }
-
   getUserWorkSituation(
     username: string,
     date: Date,
   ): Promise<UserWorkSituation> {
-    return Promise.resolve(UserWorkSituation.IN_OFFICE);
+    return this.remoteWorkApp.getUserWorkSituation(username, date);
   }
 
   setupRoutes(): void {
