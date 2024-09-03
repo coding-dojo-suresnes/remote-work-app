@@ -1,4 +1,8 @@
-import { IUserWorkSituationPort, UserWorkSituation } from '../../domain';
+import {
+  IUserWorkSituationPort,
+  UserWeekPresence,
+  UserWorkSituation,
+} from '../../domain';
 
 export class UserWorkSituationRepository implements IUserWorkSituationPort {
   private users: Map<string, Map<Date, UserWorkSituation>> = new Map();
@@ -22,5 +26,11 @@ export class UserWorkSituationRepository implements IUserWorkSituationPort {
     }
     this.users.get(username)?.set(date, userWorkSituation);
     return Promise.resolve();
+  }
+
+  persistUserWeekPresence(
+    userWeekPresence: UserWeekPresence,
+  ): Promise<UserWeekPresence> {
+    throw new Error('Method not implemented.');
   }
 }

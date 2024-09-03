@@ -1,3 +1,4 @@
+import { UserWeekPresence } from '../../user-presence.entity';
 import { UserWorkSituation } from '../../user-work-situation.entity';
 
 export interface IUserWorkSituationPort {
@@ -10,4 +11,7 @@ export interface IUserWorkSituationPort {
     date: Date,
     userWorkSituation: UserWorkSituation,
   ): Promise<void>;
+  persistUserWeekPresence(
+    userWeekPresence: UserWeekPresence,
+  ): Promise<UserWeekPresence>;
 }
