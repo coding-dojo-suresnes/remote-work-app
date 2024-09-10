@@ -42,7 +42,13 @@ export class RemoteWorkServer {
 
   setupRoutes(): void {
     this.server.get('/user-presence', async (req, res) => {
-      const workSituation = await this.getUserWorkSituation('', new Date());
+      // TODO: validate request DTO
+      const { username, date } = req.query as any;
+
+      const workSituation = await this.getUserWorkSituation(
+        username,
+        new Date(date),
+      );
       return res.json({
         workSituation,
       });

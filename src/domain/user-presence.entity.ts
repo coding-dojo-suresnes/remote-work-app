@@ -2,20 +2,21 @@ import { UserWorkSituation } from './user-work-situation.entity';
 import { WeekDay } from './week-day.entity';
 
 export class UserWeekPresence {
-  userPresence: Map<WeekDay, UserWorkSituation> = new Map();
+  userPresence: Map<string, UserWorkSituation> = new Map();
+
+  constructor(private username: string) {}
 
   getUsername(): string {
     return this.username;
   }
 
   getUserPresence(weekDay: WeekDay): UserWorkSituation {
-    return this.userPresence.get(weekDay) || UserWorkSituation.NOT_DEFINED;
+    return (
+      this.userPresence.get(weekDay.toString()) || UserWorkSituation.NOT_DEFINED
+    );
   }
 
-  // TODO: make WeekDay as an objectValue instead of an enum
   setPresence(weekDay: WeekDay, presence: UserWorkSituation): void {
-    this.userPresence.set(weekDay, presence);
+    this.userPresence.set(weekDay.toString(), presence);
   }
-
-  constructor(private username: string) {}
 }

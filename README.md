@@ -19,5 +19,10 @@
 - 2024-07-16: Refactor the server so that it uses a RemoteWorkApp, continue tests for /user-presence
 - 2024-07-16: Create UserWeekPresence entity
 - 2024-09-03: continue save user presence, there is a failed test to make pass
+- 2024-09-10: Implement E2E test that sets a user presence to IN_OFFICE on a given day and then retrieves it
 
 ## Next steps
+
+- Delete all useless tests
+- Fix useful tests
+- Implement DTOs for POST and GET user-presence

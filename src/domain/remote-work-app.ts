@@ -22,7 +22,8 @@ export class RemoteWorkApp implements IRemoteWorkApp {
   ): Promise<UserWeekPresence> {
     const userWeekPresence = new UserWeekPresence(username);
 
-    userWeekPresence.setPresence(WeekDay.fromDate(date), workSituation);
+    const day = WeekDay.fromDate(date);
+    userWeekPresence.setPresence(day, workSituation);
 
     return this.userPresenceRepository.persistUserWeekPresence(
       userWeekPresence,
