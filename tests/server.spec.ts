@@ -4,9 +4,10 @@ import supertest from 'supertest';
 import {
   IUserWorkSituationPort,
   RemoteWorkApp,
+  UserWeekPresence,
   UserWorkSituation,
 } from '../src/domain';
-import { RemoteWorkServer } from '../src/infra/adapter/remote-work-server';
+import { RemoteWorkServer } from '../src/infra/adapter/server';
 
 describe('Rest API server', () => {
   const repoMock = mock<IUserWorkSituationPort>();
@@ -52,6 +53,36 @@ describe('Rest API server', () => {
         .expect(200)
         .then((response) => {
           expect(response.body).toEqual({ workSituation: 'REMOTE' });
+        });
+    });
+
+    it('should save a day of presence', (done) => {
+      // FIXME: this test is not validating anything
+      const server = app.start();
+      repoMock.persistUserWeekPresence.mockResolvedValueOnce(
+        new UserWeekPresence('elias'),
+      );
+
+      supertest(server)
+        .post('/user-presence')
+        .send(
+          JSON.stringify({
+            username: 'elias',
+            date: '2024-06-01',
+            situation: 'IN_OFFICE',
+          }),
+        )
+        .set('Content-Type', 'application/json')
+        .set('Accept', 'application/json')
+        .expect(200)
+        .then((response) => {
+          expect(response.body).toEqual({
+            workSituation: {
+              userPresence: {},
+              username: 'elias',
+            },
+          });
+          done();
         });
     });
   });

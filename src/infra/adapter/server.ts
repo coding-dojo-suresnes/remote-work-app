@@ -1,8 +1,14 @@
 import { Server } from 'http';
 
+import bodyParser from 'body-parser';
 import express, { Express } from 'express';
 
-import { IRemoteWorkApp, UserWorkSituation } from '../../domain';
+import {
+  IRemoteWorkApp,
+  UserWeekPresence,
+  UserWorkSituation,
+  userWorkSituationFromString,
+} from '../../domain';
 
 export class RemoteWorkServer {
   private server: Express;
@@ -14,6 +20,8 @@ export class RemoteWorkServer {
     private readonly port = 3000,
   ) {
     this.server = express();
+    this.server.use(bodyParser.json());
+    this.server.use(bodyParser.urlencoded({ extended: true }));
     this.setupRoutes();
   }
 
@@ -24,12 +32,31 @@ export class RemoteWorkServer {
     return this.remoteWorkApp.getUserWorkSituation(username, date);
   }
 
+  saveUserWorkSituation(
+    username: string,
+    date: Date,
+    situation: UserWorkSituation,
+  ): Promise<UserWeekPresence> {
+    return this.remoteWorkApp.saveUserWorkSituation(username, date, situation);
+  }
+
   setupRoutes(): void {
     this.server.get('/user-presence', async (req, res) => {
       const workSituation = await this.getUserWorkSituation('', new Date());
       return res.json({
         workSituation,
       });
+    });
+    this.server.post('/user-presence', async (req, res) => {
+      // TODO: validate request DTO
+      const myBody: { username: string; date: string; situation: string } =
+        req.body;
+      const workSituation = await this.saveUserWorkSituation(
+        myBody.username,
+        new Date(myBody.date),
+        userWorkSituationFromString(myBody.situation),
+      );
+      res.json({ workSituation });
     });
   }
 
