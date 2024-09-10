@@ -23,6 +23,9 @@
 
 ## Next steps
 
-- Delete all useless tests
-- Fix useful tests
 - Implement DTOs for POST and GET user-presence
+- Is it useful to save week by week and not day by day ?
+- Test all functions in UserWorkSituationRepository
+- In RemoteWorkApp, saving erases the previous state of userWeekPresence.
+- Allow saving multiple weeks (if we choose week-by-week system)
+- Add user entity

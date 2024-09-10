@@ -6,11 +6,7 @@ export interface IUserWorkSituationPort {
     username: string,
     date: Date,
   ): Promise<UserWorkSituation>;
-  saveUserWorkSituation(
-    username: string,
-    date: Date,
-    userWorkSituation: UserWorkSituation,
-  ): Promise<void>;
+
   persistUserWeekPresence(
     userWeekPresence: UserWeekPresence,
   ): Promise<UserWeekPresence>;
