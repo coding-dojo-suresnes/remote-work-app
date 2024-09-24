@@ -21,11 +21,12 @@
 - 2024-09-03: continue save user presence, there is a failed test to make pass
 - 2024-09-10: Implement E2E test that sets a user presence to IN_OFFICE on a given day and then retrieves it
 - 2024-09-24: Implement DTOs for POST and GET user-presence
+- 2024-09-24: Replace UserWeekPresence by UserDayPresence
 
 ## Next steps
 
-- Is it useful to save week by week and not day by day ?
 - Test all functions in UserWorkSituationRepository
 - In RemoteWorkApp, saving erases the previous state of userWeekPresence.
 - Allow saving multiple weeks (if we choose week-by-week system)
 - Add user entity
+- Replace username by user

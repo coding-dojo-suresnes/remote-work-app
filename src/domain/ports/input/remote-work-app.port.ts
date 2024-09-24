@@ -1,12 +1,12 @@
-import { UserWeekPresence } from '../../user-presence.entity';
+import { UserPresence } from '../../user-presence.entity';
 import { UserWorkSituation } from '../../user-work-situation.entity';
 
 export interface IRemoteWorkApp {
   saveUserWorkSituation(
     username: string,
-    date: Date,
+    date: string,
     situation: UserWorkSituation,
-  ): Promise<UserWeekPresence>;
+  ): Promise<UserPresence>;
   isUserInOffice(username: string, date: Date): Promise<boolean>;
   getUserWorkSituation(
     username: string,

@@ -1,10 +1,10 @@
 import { mock } from 'jest-mock-extended';
 
+import { DayDate } from './day-date.entity';
 import { IUserWorkSituationPort } from './ports';
 import { RemoteWorkApp } from './remote-work-app';
-import { UserWeekPresence } from './user-presence.entity';
+import { UserPresence } from './user-presence.entity';
 import { UserWorkSituation } from './user-work-situation.entity';
-import { WeekDay, WeekDayEnum } from './week-day.entity';
 
 describe('isUserInOffice', () => {
   const mockRepository = mock<IUserWorkSituationPort>();
@@ -15,52 +15,22 @@ describe('isUserInOffice', () => {
   });
   it('should save an user presence on a Tuesday', async () => {
     const username = 'user';
-    const date = new Date('2024-07-16T12:00:00.000Z');
-
+    const date = new DayDate(16, 7, 2024);
     const workSituation = UserWorkSituation.IN_OFFICE;
 
     mockRepository.persistUserWeekPresence.mockResolvedValue(
-      new UserWeekPresence(username),
+      new UserPresence(username, date, workSituation),
     );
-    const expectedPresence = new UserWeekPresence(username);
-    expectedPresence.setPresence(
-      new WeekDay(WeekDayEnum.Tuesday),
-      UserWorkSituation.IN_OFFICE,
-    );
+    const expectedPresence = new UserPresence(username, date, workSituation);
 
-    const response = (await remoteWorkApp.saveUserWorkSituation(
+    const response = await remoteWorkApp.saveUserWorkSituation(
       username,
-      date,
+      date.toString(),
       workSituation,
-    )) as any;
-
-    expect(response.getUsername()).toBe(username); // TODO: check work situation as been set in good date
-    expect(mockRepository.persistUserWeekPresence).toHaveBeenCalledWith(
-      expectedPresence,
-    );
-  });
-  it('should save a user presence on a Sunday', async () => {
-    const username = 'user';
-    const date = new Date('2024-07-14T12:00:00.000Z');
-
-    const workSituation = UserWorkSituation.REMOTE;
-
-    mockRepository.persistUserWeekPresence.mockResolvedValue(
-      new UserWeekPresence(username),
-    );
-    const expectedPresence = new UserWeekPresence(username);
-    expectedPresence.setPresence(
-      new WeekDay(WeekDayEnum.Sunday),
-      UserWorkSituation.REMOTE,
     );
 
-    const response = (await remoteWorkApp.saveUserWorkSituation(
-      username,
-      date,
-      workSituation,
-    )) as any;
-
-    expect(response.getUsername()).toBe(username); // TODO: check work situation as been set in good date
+    expect(response.username).toBe(username);
+    expect(response.dayDate).toBe(date);
     expect(mockRepository.persistUserWeekPresence).toHaveBeenCalledWith(
       expectedPresence,
     );

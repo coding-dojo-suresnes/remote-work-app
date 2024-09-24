@@ -4,9 +4,10 @@ import supertest from 'supertest';
 import {
   IUserWorkSituationPort,
   RemoteWorkApp,
-  UserWeekPresence,
+  UserPresence,
   UserWorkSituation,
 } from '../src/domain';
+import { DayDate } from '../src/domain/day-date.entity';
 import { RemoteWorkServer } from '../src/infra/adapter/server';
 
 describe('Rest API server', () => {
@@ -16,54 +17,54 @@ describe('Rest API server', () => {
     app.stop();
   });
 
-  it('should get an 404 error if the url requested doest not exist', (done) => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.resetAllMocks();
+  });
+
+  it('should get an 404 error if the url requested doest not exist', async () => {
     const server = app.start();
 
-    supertest(server)
-      .get('/error-404')
-      .expect(404)
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      .end((err) => done(err));
+    await supertest(server).get('/error-404').expect(404);
   });
   describe('/user-presence', () => {
-    it('should return a IN_OFFICE when user is in office', () => {
+    it('should return a IN_OFFICE when user is in office', async () => {
       const server = app.start();
       repoMock.getUserWorkSituation.mockResolvedValueOnce(
         UserWorkSituation.IN_OFFICE,
       );
 
-      supertest(server)
-        .get('/user-presence?username=wayglem')
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then((response) => {
-          expect(response.body).toEqual({ workSituation: 'IN_OFFICE' });
-        });
+      const response = await supertest(server).get(
+        '/user-presence?username=wayglem&date=2020-02-02',
+      );
+
+      expect(response.body).toEqual({ workSituation: 'IN_OFFICE' });
+      expect(response.status).toBe(200);
     });
 
-    it('should return a REMOTE when user is remote', () => {
+    it('should return a REMOTE when user is remote', async () => {
       const server = app.start();
       repoMock.getUserWorkSituation.mockResolvedValueOnce(
         UserWorkSituation.REMOTE,
       );
 
-      supertest(server)
-        .get('/user-presence?username=wayglem')
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then((response) => {
-          expect(response.body).toEqual({ workSituation: 'REMOTE' });
-        });
-    });
-
-    it('should save a day of presence', (done) => {
-      // FIXME: this test is not validating anything
-      const server = app.start();
-      repoMock.persistUserWeekPresence.mockResolvedValueOnce(
-        new UserWeekPresence('elias'),
+      const response = await supertest(server).get(
+        '/user-presence?username=wayglem&date=2020-02-02',
       );
 
-      supertest(server)
+      expect(response.body).toEqual({ workSituation: 'REMOTE' });
+      expect(response.status).toBe(200);
+    });
+
+    it('should save a day of presence', async () => {
+      // FIXME: this test is not validating anything
+      const server = app.start();
+      const date = new DayDate(1, 6, 2024);
+      repoMock.persistUserWeekPresence.mockResolvedValueOnce(
+        new UserPresence('elias', date, UserWorkSituation.IN_OFFICE),
+      );
+
+      const response = await supertest(server)
         .post('/user-presence')
         .send(
           JSON.stringify({
@@ -73,17 +74,16 @@ describe('Rest API server', () => {
           }),
         )
         .set('Content-Type', 'application/json')
-        .set('Accept', 'application/json')
-        .expect(200)
-        .then((response) => {
-          expect(response.body).toEqual({
-            workSituation: {
-              userPresence: {},
-              username: 'elias',
-            },
-          });
-          done();
-        });
+        .set('Accept', 'application/json');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({
+        workSituation: {
+          day: '2024-06-01',
+          presence: 'IN_OFFICE',
+          username: 'elias',
+        },
+      });
     });
   });
 });

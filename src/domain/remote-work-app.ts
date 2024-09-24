@@ -1,7 +1,7 @@
+import { DayDate } from './day-date.entity';
 import { IRemoteWorkApp, IUserWorkSituationPort } from './ports';
-import { UserWeekPresence } from './user-presence.entity';
+import { UserPresence } from './user-presence.entity';
 import { UserWorkSituation } from './user-work-situation.entity';
-import { WeekDay } from './week-day.entity';
 
 export class RemoteWorkApp implements IRemoteWorkApp {
   constructor(
@@ -17,13 +17,14 @@ export class RemoteWorkApp implements IRemoteWorkApp {
 
   public async saveUserWorkSituation(
     username: string,
-    date: Date,
+    date: string,
     workSituation: UserWorkSituation,
-  ): Promise<UserWeekPresence> {
-    const userWeekPresence = new UserWeekPresence(username);
-
-    const day = WeekDay.fromDate(date);
-    userWeekPresence.setPresence(day, workSituation);
+  ): Promise<UserPresence> {
+    const userWeekPresence = new UserPresence(
+      username,
+      DayDate.fromISOZuluString(date),
+      workSituation,
+    );
 
     return this.userPresenceRepository.persistUserWeekPresence(
       userWeekPresence,

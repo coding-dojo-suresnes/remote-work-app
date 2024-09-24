@@ -1,22 +1,34 @@
+import { DayDate } from './day-date.entity';
 import { UserWorkSituation } from './user-work-situation.entity';
-import { WeekDay } from './week-day.entity';
 
-export class UserWeekPresence {
-  userPresence: Map<string, UserWorkSituation> = new Map();
+export class UserPresence {
+  constructor(
+    private readonly _username: string,
+    private readonly _dayDate: DayDate,
+    private readonly _presence: UserWorkSituation = UserWorkSituation.NOT_DEFINED,
+  ) {}
 
-  constructor(private username: string) {}
-
-  getUsername(): string {
-    return this.username;
+  public get username(): string {
+    return this._username;
   }
 
-  getUserPresence(weekDay: WeekDay): UserWorkSituation {
-    return (
-      this.userPresence.get(weekDay.toString()) || UserWorkSituation.NOT_DEFINED
-    );
+  public get presence(): UserWorkSituation {
+    return this._presence;
   }
 
-  setPresence(weekDay: WeekDay, presence: UserWorkSituation): void {
-    this.userPresence.set(weekDay.toString(), presence);
+  public get dayDate(): DayDate {
+    return this._dayDate;
+  }
+
+  public toObject(): {
+    username: string;
+    presence: UserWorkSituation;
+    day: string;
+  } {
+    return {
+      username: this._username,
+      presence: this._presence,
+      day: this._dayDate.toString(),
+    };
   }
 }

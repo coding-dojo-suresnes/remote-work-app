@@ -6,7 +6,7 @@ import { ZodError } from 'zod';
 
 import {
   IRemoteWorkApp,
-  UserWeekPresence,
+  UserPresence,
   UserWorkSituation,
   userWorkSituationFromString,
 } from '../../domain';
@@ -36,9 +36,9 @@ export class RemoteWorkServer {
 
   saveUserWorkSituation(
     username: string,
-    date: Date,
+    date: string,
     situation: UserWorkSituation,
-  ): Promise<UserWeekPresence> {
+  ): Promise<UserPresence> {
     return this.remoteWorkApp.saveUserWorkSituation(username, date, situation);
   }
 
@@ -66,10 +66,10 @@ export class RemoteWorkServer {
         const myBody = postUserPresenceBodySchema.parse(req.body);
         const workSituation = await this.saveUserWorkSituation(
           myBody.username,
-          new Date(myBody.date),
+          myBody.date,
           userWorkSituationFromString(myBody.situation),
         );
-        return res.json({ workSituation });
+        return res.json({ workSituation: workSituation.toObject() });
       } catch (error) {
         if (error instanceof ZodError) {
           return res.status(400).json({ error });
