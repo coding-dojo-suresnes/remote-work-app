@@ -10,7 +10,7 @@ import {
   UserWorkSituation,
   userWorkSituationFromString,
 } from '../../domain';
-import { getUserPresenceQuerySchema } from './dto';
+import { getUserPresenceQuerySchema, postUserPresenceBodySchema } from './dto';
 
 export class RemoteWorkServer {
   private server: Express;
@@ -62,15 +62,20 @@ export class RemoteWorkServer {
       }
     });
     this.server.post('/user-presence', async (req, res) => {
-      // TODO: validate request DTO
-      const myBody: { username: string; date: string; situation: string } =
-        req.body;
-      const workSituation = await this.saveUserWorkSituation(
-        myBody.username,
-        new Date(myBody.date),
-        userWorkSituationFromString(myBody.situation),
-      );
-      res.json({ workSituation });
+      try {
+        const myBody = postUserPresenceBodySchema.parse(req.body);
+        const workSituation = await this.saveUserWorkSituation(
+          myBody.username,
+          new Date(myBody.date),
+          userWorkSituationFromString(myBody.situation),
+        );
+        return res.json({ workSituation });
+      } catch (error) {
+        if (error instanceof ZodError) {
+          return res.status(400).json({ error });
+        }
+        throw error;
+      }
     });
   }
 

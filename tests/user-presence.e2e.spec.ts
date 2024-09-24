@@ -55,12 +55,24 @@ describe('Rest API server', () => {
       expect(response.body).toStrictEqual({ workSituation: 'NOT_DEFINED' });
     });
 
-    it('should return 400 if date and username is not valid', async () => {
+    it('should return 400 if date and username is not valid when getting user presence', async () => {
       const server = app.start();
 
       const response = await supertest(server)
         .get('/user-presence')
         .query({ username: 123, date: '2024-ab-01' });
+
+      expect(response.status).toBe(400);
+    });
+
+    it('should return 400 if situation is incorrect when setting user presence', async () => {
+      const server = app.start();
+
+      const response = await supertest(server).post('/user-presence').send({
+        username: 'toto',
+        date: '2024-02-01',
+        situation: 'incorrect_situation',
+      });
 
       expect(response.status).toBe(400);
     });
