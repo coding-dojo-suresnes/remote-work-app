@@ -54,5 +54,15 @@ describe('Rest API server', () => {
       expect(response.status).toBe(200);
       expect(response.body).toStrictEqual({ workSituation: 'NOT_DEFINED' });
     });
+
+    it('should return 400 if date and username is not valid', async () => {
+      const server = app.start();
+
+      const response = await supertest(server)
+        .get('/user-presence')
+        .query({ username: 123, date: '2024-ab-01' });
+
+      expect(response.status).toBe(400);
+    });
   });
 });

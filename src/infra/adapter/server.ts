@@ -2,6 +2,7 @@ import { Server } from 'http';
 
 import bodyParser from 'body-parser';
 import express, { Express } from 'express';
+import { ZodError } from 'zod';
 
 import {
   IRemoteWorkApp,
@@ -9,6 +10,7 @@ import {
   UserWorkSituation,
   userWorkSituationFromString,
 } from '../../domain';
+import { getUserPresenceQuerySchema } from './dto';
 
 export class RemoteWorkServer {
   private server: Express;
@@ -42,16 +44,22 @@ export class RemoteWorkServer {
 
   setupRoutes(): void {
     this.server.get('/user-presence', async (req, res) => {
-      // TODO: validate request DTO
-      const { username, date } = req.query as any;
+      try {
+        const { username, date } = getUserPresenceQuerySchema.parse(req.query);
 
-      const workSituation = await this.getUserWorkSituation(
-        username,
-        new Date(date),
-      );
-      return res.json({
-        workSituation,
-      });
+        const workSituation = await this.getUserWorkSituation(
+          username,
+          new Date(date),
+        );
+        return res.json({
+          workSituation,
+        });
+      } catch (error) {
+        if (error instanceof ZodError) {
+          return res.status(400).json({ error });
+        }
+        throw error;
+      }
     });
     this.server.post('/user-presence', async (req, res) => {
       // TODO: validate request DTO
