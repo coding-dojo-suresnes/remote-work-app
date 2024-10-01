@@ -22,11 +22,16 @@
 - 2024-09-10: Implement E2E test that sets a user presence to IN_OFFICE on a given day and then retrieves it
 - 2024-09-24: Implement DTOs for POST and GET user-presence
 - 2024-09-24: Replace UserWeekPresence by UserDayPresence
+- 2024-09-24: In RemoteWorkApp, saving erases the previous state of userWeekPresence
 
 ## Next steps
 
-- Test all functions in UserWorkSituationRepository
-- In RemoteWorkApp, saving erases the previous state of userWeekPresence.
-- Allow saving multiple weeks (if we choose week-by-week system)
-- Add user entity
-- Replace username by user
+- Add user entity (replace username by user)
+- User can set a presence only for an half-day (AM / PM)
+- Add database (search a {db}-memory-server for testing)
+- Add login / user base (auth0 or alternative, SSO mandatory)
+- unset a user presence
+- get a week presence for one user
+- list all users
+- add a location to the office presence
+- manage locations (desk, floor, building, office address)

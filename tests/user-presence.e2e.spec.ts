@@ -23,7 +23,7 @@ describe('Rest API server', () => {
         .post('/user-presence')
         .send(
           JSON.stringify({
-            username: 'elias',
+            username: 'wayglem',
             date: '2024-06-01',
             situation: 'IN_OFFICE',
           }),
@@ -33,7 +33,7 @@ describe('Rest API server', () => {
 
       const response = await supertest(server)
         .get('/user-presence')
-        .query({ username: 'elias', date: '2024-06-01' });
+        .query({ username: 'wayglem', date: '2024-06-01' });
 
       expect(response.headers['content-type']).toBe(
         'application/json; charset=utf-8',
@@ -46,7 +46,7 @@ describe('Rest API server', () => {
 
       const response = await supertest(server)
         .get('/user-presence')
-        .query({ username: 'elias', date: '2024-06-01' });
+        .query({ username: 'wayglem', date: '2024-06-01' });
 
       expect(response.headers['content-type']).toBe(
         'application/json; charset=utf-8',
