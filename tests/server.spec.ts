@@ -95,6 +95,28 @@ describe('Rest API server', () => {
     });
   });
 
+  describe('GET /users/:id', () => {
+    it('should return a 404 error when user does not exist', async () => {
+      const server = app.start();
+
+      const response = await supertest(server).get('/users/123');
+
+      expect(response.status).toBe(404);
+    });
+
+    it('should return user info when user exists', async () => {
+      const server = app.start();
+      const user = new UserEntity('wayglem');
+      user.firstName = 'firstName';
+      user.lastName = 'lastName';
+      userRepository.persistUser(user);
+
+      const response = await supertest(server).get(`/users/${user.id.value}`);
+
+      expect(response.status).toBe(200);
+    });
+  });
+
   describe('GET /user-presence', () => {
     it('should return a IN_OFFICE when user is in office', async () => {
       const server = app.start();

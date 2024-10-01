@@ -30,13 +30,13 @@
 
 ## Next steps
 
-- Add user entity (replace username by user)
-  - add user in savePresence
+- Finish route GET /users/:id
+- check user existence before savePresence
+- list all users
 - User can set a presence only for an half-day (AM / PM)
 - Add database (search a {db}-memory-server for testing)
 - Add login / user base (auth0 or alternative, SSO mandatory)
 - unset a user presence
 - get a week presence for one user
-- list all users
 - add a location to the office presence
 - manage locations (desk, floor, building, office address)

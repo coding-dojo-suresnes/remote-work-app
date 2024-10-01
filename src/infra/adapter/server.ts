@@ -105,6 +105,7 @@ export class RemoteWorkServer {
         throw error;
       }
     });
+    this.server.get('/users/:id', (req, res) => res.sendStatus(404));
   }
 
   stop(): void {
