@@ -2,12 +2,17 @@ import supertest from 'supertest';
 
 import { RemoteWorkApp, UserPresence, UserWorkSituation } from '../src/domain';
 import { DayDate } from '../src/domain/day-date.entity';
+import { UserEntity } from '../src/domain/user.entity';
 import { RemoteWorkServer } from '../src/infra/adapter/server';
 import { UserWorkSituationRepository } from '../src/infra/adapter/user-work-situation.repository';
+import { UserRepository } from '../src/infra/adapter/user.repository';
 
 describe('Rest API server', () => {
-  const repository = new UserWorkSituationRepository();
-  const app = new RemoteWorkServer(new RemoteWorkApp(repository));
+  const userWorkSituationRepository = new UserWorkSituationRepository();
+  const userRepository = new UserRepository();
+  const app = new RemoteWorkServer(
+    new RemoteWorkApp(userWorkSituationRepository, userRepository),
+  );
   afterEach(() => {
     app.stop();
   });
@@ -22,10 +27,78 @@ describe('Rest API server', () => {
 
     await supertest(server).get('/error-404').expect(404);
   });
+  describe('POST /users', () => {
+    it('should return a 400 error when request body is not valid', async () => {
+      const server = app.start();
+
+      const response = await supertest(server)
+        .post('/users')
+        .send(
+          JSON.stringify({
+            firstName: 'wayglem',
+          }),
+        )
+        .set('Content-Type', 'application/json')
+        .set('Accept', 'application/json');
+
+      expect(response.status).toBe(400);
+    });
+    it('should create a user', async () => {
+      const server = app.start();
+
+      const response = await supertest(server)
+        .post('/users')
+        .send(
+          JSON.stringify({
+            username: 'wayglem',
+            firstName: 'me',
+            lastName: 'again',
+          }),
+        )
+        .set('Content-Type', 'application/json')
+        .set('Accept', 'application/json');
+
+      expect(response.body.user).toBeDefined();
+      const { user } = response.body;
+      expect(user.username).toEqual('wayglem');
+      expect(user.firstName).toEqual('me');
+      expect(user.lastName).toEqual('again');
+      expect(response.status).toBe(200);
+    });
+    it('should update a user when posting a user with an existing username', async () => {
+      const server = app.start();
+      const oldUser = new UserEntity('wayglem');
+      oldUser.firstName = 'old first';
+      oldUser.lastName = 'old last';
+      userRepository.persistUser(oldUser);
+      const old = userRepository.getUserByUsername('wayglem');
+
+      const response = await supertest(server)
+        .post('/users')
+        .send(
+          JSON.stringify({
+            username: 'wayglem',
+            firstName: 'another me',
+            lastName: 'another me last',
+          }),
+        )
+        .set('Content-Type', 'application/json')
+        .set('Accept', 'application/json');
+
+      expect(response.body.user).toBeDefined();
+      const { user } = response.body;
+      expect(user.username).toEqual('wayglem');
+      expect(user.firstName).toEqual('another me');
+      expect(user.lastName).toEqual('another me last');
+      expect(user).not.toStrictEqual(old?.toObject());
+      expect(response.status).toBe(200);
+    });
+  });
+
   describe('GET /user-presence', () => {
     it('should return a IN_OFFICE when user is in office', async () => {
       const server = app.start();
-      repository.persistUserWeekPresence(
+      userWorkSituationRepository.persistUserWeekPresence(
         new UserPresence(
           'wayglem',
           new DayDate(2, 2, 2020),
@@ -43,7 +116,7 @@ describe('Rest API server', () => {
 
     it('should return a REMOTE when user is remote', async () => {
       const server = app.start();
-      repository.persistUserWeekPresence(
+      userWorkSituationRepository.persistUserWeekPresence(
         new UserPresence(
           'wayglem',
           new DayDate(2, 2, 2020),
@@ -90,7 +163,7 @@ describe('Rest API server', () => {
     it('should update presence when post a new presence on the same day', async () => {
       const server = app.start();
       const date = new DayDate(1, 6, 2024);
-      repository.persistUserWeekPresence(
+      userWorkSituationRepository.persistUserWeekPresence(
         new UserPresence('wayglem', date, UserWorkSituation.IN_OFFICE),
       );
 

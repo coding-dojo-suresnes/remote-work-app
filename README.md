@@ -26,11 +26,11 @@
 - 2024-10-01 Add user entity (replace username by user)
   - create user entity
   - create user repository
+  - create API addUser
 
 ## Next steps
 
 - Add user entity (replace username by user)
-  - create API addUser
   - add user in savePresence
 - User can set a presence only for an half-day (AM / PM)
 - Add database (search a {db}-memory-server for testing)

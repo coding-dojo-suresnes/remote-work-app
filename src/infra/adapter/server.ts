@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 import { Server } from 'http';
 
 import bodyParser from 'body-parser';
@@ -10,7 +11,9 @@ import {
   UserWorkSituation,
   userWorkSituationFromString,
 } from '../../domain';
+import { UserEntity } from '../../domain/user.entity';
 import { getUserPresenceQuerySchema, postUserPresenceBodySchema } from './dto';
+import { postUserBodySchema } from './dto/post-user-body.dto';
 
 export class RemoteWorkServer {
   private server: Express;
@@ -42,6 +45,14 @@ export class RemoteWorkServer {
     return this.remoteWorkApp.saveUserWorkSituation(username, date, situation);
   }
 
+  saveUser(
+    username: string,
+    firstName?: string,
+    lastName?: string,
+  ): Promise<UserEntity> {
+    return this.remoteWorkApp.saveUser(username, firstName, lastName);
+  }
+
   setupRoutes(): void {
     this.server.get('/user-presence', async (req, res) => {
       try {
@@ -70,6 +81,23 @@ export class RemoteWorkServer {
           userWorkSituationFromString(myBody.situation),
         );
         return res.json({ workSituation: workSituation.toObject() });
+      } catch (error) {
+        if (error instanceof ZodError) {
+          return res.status(400).json({ error });
+        }
+        throw error;
+      }
+    });
+    this.server.post('/users', async (req, res) => {
+      try {
+        const body = postUserBodySchema.parse(req.body);
+
+        const user = await this.saveUser(
+          body.username,
+          body.firstName,
+          body.lastName,
+        );
+        return res.json({ user: user.toObject() });
       } catch (error) {
         if (error instanceof ZodError) {
           return res.status(400).json({ error });

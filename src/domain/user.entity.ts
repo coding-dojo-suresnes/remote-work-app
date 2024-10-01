@@ -29,4 +29,18 @@ export class UserEntity {
 
     return clone;
   }
+
+  public toObject(): {
+    id: string;
+    username: string;
+    firstName?: string;
+    lastName?: string;
+  } {
+    return {
+      id: this._id.value,
+      username: this.username,
+      firstName: this.firstName,
+      lastName: this.lastName,
+    };
+  }
 }
