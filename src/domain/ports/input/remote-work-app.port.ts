@@ -18,4 +18,5 @@ export interface IRemoteWorkApp {
     firstName?: string,
     lastName?: string,
   ): Promise<UserEntity>;
+  getUser(id: string): Promise<UserEntity | null>;
 }

@@ -1,4 +1,5 @@
 import { IUserPort } from '../../domain/ports/output/user.port';
+import { UserId } from '../../domain/user-id.value-object';
 import { UserEntity } from '../../domain/user.entity';
 
 export class UserRepository implements IUserPort {
@@ -6,6 +7,10 @@ export class UserRepository implements IUserPort {
 
   public getUserByUsername(username: string): UserEntity | null {
     return this._users.find((user) => user.username === username) ?? null;
+  }
+
+  public getUserById(id: UserId): UserEntity | null {
+    return this._users.find((user) => user.id.value === id.value) ?? null;
   }
 
   public persistUser(user: UserEntity): void {

@@ -13,6 +13,7 @@ import {
 } from '../../domain';
 import { UserEntity } from '../../domain/user.entity';
 import { getUserPresenceQuerySchema, postUserPresenceBodySchema } from './dto';
+import { getUserByIdQuerySchema } from './dto/get-user-by-id-query.dto';
 import { postUserBodySchema } from './dto/post-user-body.dto';
 
 export class RemoteWorkServer {
@@ -105,7 +106,23 @@ export class RemoteWorkServer {
         throw error;
       }
     });
-    this.server.get('/users/:id', (req, res) => res.sendStatus(404));
+    this.server.get('/users/:id', async (req, res) => {
+      try {
+        const query = getUserByIdQuerySchema.parse(req.params);
+
+        const user = await this.remoteWorkApp.getUser(query.id);
+
+        if (user) {
+          return res.json({ user: user.toObject() });
+        }
+        return res.sendStatus(404);
+      } catch (error) {
+        if (error instanceof ZodError) {
+          return res.status(400).json({ error });
+        }
+        throw error;
+      }
+    });
   }
 
   stop(): void {

@@ -1,6 +1,7 @@
 import { DayDate } from './day-date.entity';
 import { IRemoteWorkApp, IUserWorkSituationPort } from './ports';
 import { IUserPort } from './ports/output/user.port';
+import { UserId } from './user-id.value-object';
 import { UserPresence } from './user-presence.entity';
 import { UserWorkSituation } from './user-work-situation.entity';
 import { UserEntity } from './user.entity';
@@ -21,6 +22,10 @@ export class RemoteWorkApp implements IRemoteWorkApp {
     newUser.lastName = lastName;
     this.userRepository.persistUser(newUser);
     return Promise.resolve(newUser);
+  }
+
+  getUser(id: string): Promise<UserEntity | null> {
+    return Promise.resolve(this.userRepository.getUserById(new UserId(id)));
   }
 
   getUserWorkSituation(

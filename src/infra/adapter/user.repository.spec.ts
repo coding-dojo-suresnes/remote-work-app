@@ -1,3 +1,4 @@
+import { UserId } from '../../domain/user-id.value-object';
 import { UserEntity } from '../../domain/user.entity';
 import { UserRepository } from './user.repository';
 
@@ -11,6 +12,17 @@ describe('UserRepository', () => {
     it('Should return null when user does not exist', () => {
       const res = sut.getUserByUsername('DO NOT EXIST');
       expect(res).toBe(null);
+    });
+  });
+  describe('getUserById', () => {
+    it('Should return null when user does not exist', () => {
+      const res = sut.getUserById(new UserId('1'));
+      expect(res).toBe(null);
+    });
+    it('Should return user when user exists', () => {
+      sut.persistUser(new UserEntity('TestUser', new UserId('1')));
+      const res = sut.getUserById(new UserId('1'));
+      expect(res?.username).toBe('TestUser');
     });
   });
   describe('persistUser', () => {

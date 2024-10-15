@@ -23,16 +23,18 @@
 - 2024-09-24: Implement DTOs for POST and GET user-presence
 - 2024-09-24: Replace UserWeekPresence by UserDayPresence
 - 2024-09-24: In RemoteWorkApp, saving erases the previous state of userWeekPresence
-- 2024-10-01 Add user entity (replace username by user)
+- 2024-10-01: Add user entity (replace username by user)
   - create user entity
   - create user repository
   - create API addUser
+- 2024-10-15: Finish route GET /users/:id
 
 ## Next steps
 
-- Finish route GET /users/:id
 - check user existence before savePresence
 - list all users
+- Cleanup test files
+- Return Promises in repositories
 - User can set a presence only for an half-day (AM / PM)
 - Add database (search a {db}-memory-server for testing)
 - Add login / user base (auth0 or alternative, SSO mandatory)
@@ -40,3 +42,4 @@
 - get a week presence for one user
 - add a location to the office presence
 - manage locations (desk, floor, building, office address)
+- add Middleware to catch errors in server.ts
