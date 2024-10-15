@@ -1,4 +1,5 @@
 import { DayDate } from './day-date.entity';
+import { UserNotFoundError } from './errors';
 import { IRemoteWorkApp, IUserWorkSituationPort } from './ports';
 import { IUserPort } from './ports/output/user.port';
 import { UserId } from './user-id.value-object';
@@ -40,6 +41,10 @@ export class RemoteWorkApp implements IRemoteWorkApp {
     date: string,
     workSituation: UserWorkSituation,
   ): Promise<UserPresence> {
+    const user = this.userRepository.getUserByUsername(username);
+    if (!user) {
+      throw new UserNotFoundError();
+    }
     const userWeekPresence = new UserPresence(
       username,
       DayDate.fromISOZuluString(date),

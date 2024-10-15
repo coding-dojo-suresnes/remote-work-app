@@ -156,8 +156,30 @@ describe('Rest API server', () => {
   });
 
   describe('POST /user-presence', () => {
+    it('should return an error when user does not exist', async () => {
+      const server = app.start();
+      const date = new DayDate(1, 6, 2024);
+
+      const response = await supertest(server)
+        .post('/user-presence')
+        .send(
+          JSON.stringify({
+            username: 'wayglem',
+            date: date.toString(),
+            situation: 'IN_OFFICE',
+          }),
+        )
+        .set('Content-Type', 'application/json')
+        .set('Accept', 'application/json');
+
+      expect(response.status).toBe(400);
+    });
     it('should save a day of presence', async () => {
       const server = app.start();
+      const user = new UserEntity('wayglem');
+      user.firstName = 'firstName';
+      user.lastName = 'lastName';
+      userRepository.persistUser(user);
       const date = new DayDate(1, 6, 2024);
 
       const response = await supertest(server)
@@ -185,6 +207,11 @@ describe('Rest API server', () => {
     it('should update presence when post a new presence on the same day', async () => {
       const server = app.start();
       const date = new DayDate(1, 6, 2024);
+      const user = new UserEntity('wayglem');
+      user.firstName = 'firstName';
+      user.lastName = 'lastName';
+      userRepository.persistUser(user);
+
       userWorkSituationRepository.persistUserWeekPresence(
         new UserPresence('wayglem', date, UserWorkSituation.IN_OFFICE),
       );

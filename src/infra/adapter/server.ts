@@ -7,6 +7,7 @@ import { ZodError } from 'zod';
 
 import {
   IRemoteWorkApp,
+  UserNotFoundError,
   UserPresence,
   UserWorkSituation,
   userWorkSituationFromString,
@@ -84,6 +85,9 @@ export class RemoteWorkServer {
         return res.json({ workSituation: workSituation.toObject() });
       } catch (error) {
         if (error instanceof ZodError) {
+          return res.status(400).json({ error });
+        }
+        if (error instanceof UserNotFoundError) {
           return res.status(400).json({ error });
         }
         throw error;

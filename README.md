@@ -28,10 +28,10 @@
   - create user repository
   - create API addUser
 - 2024-10-15: Finish route GET /users/:id
+- 2024-10-15: check user existence before savePresence
 
 ## Next steps
 
-- check user existence before savePresence
 - list all users
 - Cleanup test files
 - Return Promises in repositories
