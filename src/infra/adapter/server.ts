@@ -2,7 +2,7 @@
 import { Server } from 'http';
 
 import bodyParser from 'body-parser';
-import express, { Express } from 'express';
+import express, { Express, Response } from 'express';
 import { ZodError } from 'zod';
 
 import {
@@ -29,7 +29,27 @@ export class RemoteWorkServer {
     this.server = express();
     this.server.use(bodyParser.json());
     this.server.use(bodyParser.urlencoded({ extended: true }));
+
     this.setupRoutes();
+    this.server.use((error, req, res: Response, next) => {
+      if (error) {
+        if (error instanceof Error) {
+          return res.status(500).json({ error });
+        }
+        console.error('Middleware caught somehting that is not an error');
+        try {
+          const stringified = JSON.stringify(error);
+          console.error('Error = ', stringified);
+        } catch (err) {
+          console.error(
+            'could not stringify error: ',
+            error,
+            ' with error: ',
+            err,
+          );
+        }
+      }
+    });
   }
 
   getUserWorkSituation(
@@ -60,7 +80,7 @@ export class RemoteWorkServer {
   }
 
   setupRoutes(): void {
-    this.server.get('/user-presence', async (req, res) => {
+    this.server.get('/user-presence', async (req, res, next) => {
       try {
         const { username, date } = getUserPresenceQuerySchema.parse(req.query);
 
@@ -75,10 +95,10 @@ export class RemoteWorkServer {
         if (error instanceof ZodError) {
           return res.status(400).json({ error });
         }
-        throw error;
+        next(error);
       }
     });
-    this.server.post('/user-presence', async (req, res) => {
+    this.server.post('/user-presence', async (req, res, next) => {
       try {
         const myBody = postUserPresenceBodySchema.parse(req.body);
         const workSituation = await this.saveUserWorkSituation(
@@ -94,7 +114,7 @@ export class RemoteWorkServer {
         if (error instanceof UserNotFoundError) {
           return res.status(400).json({ error });
         }
-        throw error;
+        next(error);
       }
     });
     this.server.post('/users', async (req, res) => {

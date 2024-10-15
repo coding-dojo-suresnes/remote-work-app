@@ -104,6 +104,28 @@ describe('Rest API server', () => {
     });
   });
 
+  describe('GET /users', () => {
+    it('should get all users when users are found', async () => {
+      const server = app.start();
+      const user1 = new UserEntity('wayglem1');
+      const user2 = new UserEntity('wayglem2');
+      userRepository.persistUser(user1);
+      userRepository.persistUser(user2);
+
+      const response = await supertest(server).get('/users');
+
+      expect(response.body).toEqual({ users: [user1, user2], count: 2 });
+      expect(response.status).toBe(200);
+    });
+    it('should get empty array when no users are found', async () => {
+      const server = app.start();
+      const response = await supertest(server).get('/users');
+
+      expect(response.body).toEqual({ users: [], count: 0 });
+      expect(response.status).toBe(200);
+    });
+  });
+
   describe('GET /users/:id', () => {
     it('should return a 404 error when user does not exist', async () => {
       const server = app.start();
@@ -160,28 +182,6 @@ describe('Rest API server', () => {
       );
 
       expect(response.body).toEqual({ workSituation: 'REMOTE' });
-      expect(response.status).toBe(200);
-    });
-  });
-
-  describe('GET /users', () => {
-    it('should get all users when users are found', async () => {
-      const server = app.start();
-      const user1 = new UserEntity('wayglem1');
-      const user2 = new UserEntity('wayglem2');
-      userRepository.persistUser(user1);
-      userRepository.persistUser(user2);
-
-      const response = await supertest(server).get('/users');
-
-      expect(response.body).toEqual({ users: [user1, user2], count: 2 });
-      expect(response.status).toBe(200);
-    });
-    it('should get empty array when no users are found', async () => {
-      const server = app.start();
-      const response = await supertest(server).get('/users');
-
-      expect(response.body).toEqual({ users: [], count: 0 });
       expect(response.status).toBe(200);
     });
   });
