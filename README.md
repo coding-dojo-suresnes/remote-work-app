@@ -28,12 +28,13 @@
   - create user repository
   - create API addUser
 - 2024-10-15: Finish route GET /users/:id
-- 2024-10-15: check user existence before savePresence
+  - check user existence before savePresence
+  - list all users
 
 ## Next steps
 
-- list all users
 - Cleanup test files
+- Handle uncaught errors
 - Return Promises in repositories
 - User can set a presence only for an half-day (AM / PM)
 - Add database (search a {db}-memory-server for testing)
@@ -43,3 +44,4 @@
 - add a location to the office presence
 - manage locations (desk, floor, building, office address)
 - add Middleware to catch errors in server.ts
+- allow pagination on list all users

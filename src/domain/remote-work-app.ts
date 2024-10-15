@@ -68,4 +68,9 @@ export class RemoteWorkApp implements IRemoteWorkApp {
         throw new Error('NOT IMPLEMENTED');
     }
   }
+
+  public async getAllUsers(): Promise<{ users: UserEntity[]; count: number }> {
+    const users = await this.userRepository.getAll();
+    return { users, count: users.length };
+  }
 }

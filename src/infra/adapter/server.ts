@@ -55,6 +55,10 @@ export class RemoteWorkServer {
     return this.remoteWorkApp.saveUser(username, firstName, lastName);
   }
 
+  getAllUsers(): Promise<{ users: UserEntity[]; count: number }> {
+    return this.remoteWorkApp.getAllUsers();
+  }
+
   setupRoutes(): void {
     this.server.get('/user-presence', async (req, res) => {
       try {
@@ -103,6 +107,17 @@ export class RemoteWorkServer {
           body.lastName,
         );
         return res.json({ user: user.toObject() });
+      } catch (error) {
+        if (error instanceof ZodError) {
+          return res.status(400).json({ error });
+        }
+        throw error;
+      }
+    });
+    this.server.get('/users', async (req, res) => {
+      try {
+        const result = await this.getAllUsers();
+        return res.json(result);
       } catch (error) {
         if (error instanceof ZodError) {
           return res.status(400).json({ error });

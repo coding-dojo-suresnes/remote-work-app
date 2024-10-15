@@ -24,4 +24,8 @@ export class UserRepository implements IUserPort {
       this._users[existingIndex] = user.clone();
     }
   }
+
+  public getAll(): Promise<UserEntity[]> {
+    return Promise.resolve(this._users);
+  }
 }

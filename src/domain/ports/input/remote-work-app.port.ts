@@ -3,6 +3,7 @@ import { UserWorkSituation } from '../../user-work-situation.entity';
 import { UserEntity } from '../../user.entity';
 
 export interface IRemoteWorkApp {
+  getAllUsers(): Promise<{ users: UserEntity[]; count: number }>;
   saveUserWorkSituation(
     username: string,
     date: string,

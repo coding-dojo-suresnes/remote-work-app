@@ -1,23 +1,32 @@
 import supertest from 'supertest';
 
-import { RemoteWorkApp, UserPresence, UserWorkSituation } from '../src/domain';
+import {
+  IUserWorkSituationPort,
+  RemoteWorkApp,
+  UserPresence,
+  UserWorkSituation,
+} from '../src/domain';
 import { DayDate } from '../src/domain/day-date.entity';
+import { IUserPort } from '../src/domain/ports/output/user.port';
 import { UserEntity } from '../src/domain/user.entity';
 import { RemoteWorkServer } from '../src/infra/adapter/server';
 import { UserWorkSituationRepository } from '../src/infra/adapter/user-work-situation.repository';
 import { UserRepository } from '../src/infra/adapter/user.repository';
 
 describe('Rest API server', () => {
-  const userWorkSituationRepository = new UserWorkSituationRepository();
-  const userRepository = new UserRepository();
-  const app = new RemoteWorkServer(
-    new RemoteWorkApp(userWorkSituationRepository, userRepository),
-  );
+  let userWorkSituationRepository: IUserWorkSituationPort;
+  let userRepository: IUserPort;
+  let app: RemoteWorkServer;
   afterEach(() => {
     app.stop();
   });
 
   beforeEach(() => {
+    userRepository = new UserRepository();
+    userWorkSituationRepository = new UserWorkSituationRepository();
+    app = new RemoteWorkServer(
+      new RemoteWorkApp(userWorkSituationRepository, userRepository),
+    );
     jest.clearAllMocks();
     jest.resetAllMocks();
   });
@@ -151,6 +160,28 @@ describe('Rest API server', () => {
       );
 
       expect(response.body).toEqual({ workSituation: 'REMOTE' });
+      expect(response.status).toBe(200);
+    });
+  });
+
+  describe('GET /users', () => {
+    it('should get all users when users are found', async () => {
+      const server = app.start();
+      const user1 = new UserEntity('wayglem1');
+      const user2 = new UserEntity('wayglem2');
+      userRepository.persistUser(user1);
+      userRepository.persistUser(user2);
+
+      const response = await supertest(server).get('/users');
+
+      expect(response.body).toEqual({ users: [user1, user2], count: 2 });
+      expect(response.status).toBe(200);
+    });
+    it('should get empty array when no users are found', async () => {
+      const server = app.start();
+      const response = await supertest(server).get('/users');
+
+      expect(response.body).toEqual({ users: [], count: 0 });
       expect(response.status).toBe(200);
     });
   });
