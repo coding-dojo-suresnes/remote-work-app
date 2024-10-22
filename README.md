@@ -35,6 +35,7 @@
 
 - 2024-10-22:
   - Migrate to expressjs 5
+  - Improve middleware to handle Zod Errors
 
 ## Next steps
 

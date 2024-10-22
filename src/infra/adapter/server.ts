@@ -4,6 +4,7 @@ import { Server } from 'http';
 import bodyParser from 'body-parser';
 import express, { Express, NextFunction, Response } from 'express';
 import { ZodError } from 'zod';
+import { fromError } from 'zod-validation-error';
 
 import {
   IRemoteWorkApp,
@@ -35,8 +36,13 @@ export class RemoteWorkServer {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       (error: unknown, _req: unknown, res: Response, _next: NextFunction) => {
         if (error) {
+          if (error instanceof ZodError) {
+            res.status(400).json({ error: fromError(error).toString() });
+            return;
+          }
           if (error instanceof Error) {
             res.status(500).json({ error: error.toString() });
+            return;
           }
           console.error('Middleware caught somehting that is not an error');
           try {
@@ -84,21 +90,14 @@ export class RemoteWorkServer {
 
   setupRoutes(): void {
     this.server.get('/user-presence', async (req, res) => {
-      try {
-        const { username, date } = getUserPresenceQuerySchema.parse(req.query);
-        const workSituation = await this.getUserWorkSituation(
-          username,
-          new Date(date),
-        );
-        res.json({
-          workSituation,
-        });
-      } catch (error) {
-        if (error instanceof ZodError) {
-          res.status(400).json({ error });
-        }
-        throw error;
-      }
+      const { username, date } = getUserPresenceQuerySchema.parse(req.query);
+      const workSituation = await this.getUserWorkSituation(
+        username,
+        new Date(date),
+      );
+      res.json({
+        workSituation,
+      });
     });
     this.server.post('/user-presence', async (req, res) => {
       try {
@@ -110,58 +109,36 @@ export class RemoteWorkServer {
         );
         res.json({ workSituation: workSituation.toObject() });
       } catch (error) {
-        if (error instanceof ZodError) {
-          res.status(400).json({ error });
-        }
         if (error instanceof UserNotFoundError) {
-          res.status(400).json({ error });
+          res.status(400).json({ error: error.message });
+          return;
         }
+        throw error;
       }
     });
     this.server.post('/users', async (req, res) => {
-      try {
-        const body = postUserBodySchema.parse(req.body);
+      const body = postUserBodySchema.parse(req.body);
 
-        const user = await this.saveUser(
-          body.username,
-          body.firstName,
-          body.lastName,
-        );
-        res.json({ user: user.toObject() });
-      } catch (error) {
-        if (error instanceof ZodError) {
-          res.status(400).json({ error });
-        }
-        throw error;
-      }
+      const user = await this.saveUser(
+        body.username,
+        body.firstName,
+        body.lastName,
+      );
+      res.json({ user: user.toObject() });
     });
     this.server.get('/users', async (req, res) => {
-      try {
-        const result = await this.getAllUsers();
-        res.json(result);
-      } catch (error) {
-        if (error instanceof ZodError) {
-          res.status(400).json({ error });
-        }
-        throw error;
-      }
+      const result = await this.getAllUsers();
+      res.json(result);
     });
     this.server.get('/users/:id', async (req, res) => {
-      try {
-        const query = getUserByIdQuerySchema.parse(req.params);
+      const query = getUserByIdQuerySchema.parse(req.params);
 
-        const user = await this.remoteWorkApp.getUser(query.id);
+      const user = await this.remoteWorkApp.getUser(query.id);
 
-        if (user) {
-          res.json({ user: user.toObject() });
-        }
-        res.sendStatus(404);
-      } catch (error) {
-        if (error instanceof ZodError) {
-          res.status(400).json({ error });
-        }
-        throw error;
+      if (user) {
+        res.json({ user: user.toObject() });
       }
+      res.sendStatus(404);
     });
   }
 
