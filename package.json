@@ -12,7 +12,7 @@
   "license": "MIT",
   "dependencies": {
     "body-parser": "^1.20.2",
-    "express": "^4.19.2",
+    "express": "^5.0.1",
     "jest-mock-extended": "^3.0.7",
     "uuid": "^10.0.0",
     "zod": "^3.23.8"
@@ -21,7 +21,7 @@
     "@babel/preset-typescript": "^7.23.3",
     "@gads-citron/eslint-config-citron": "^3.0.1",
     "@jest/globals": "^29.7.0",
-    "@types/express": "^4.17.21",
+    "@types/express": "^5.0.0",
     "@types/jest": "^29.5.12",
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^7.0.1",

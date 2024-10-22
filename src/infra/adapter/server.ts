@@ -2,7 +2,7 @@
 import { Server } from 'http';
 
 import bodyParser from 'body-parser';
-import express, { Express, Response } from 'express';
+import express, { Express, NextFunction, Response } from 'express';
 import { ZodError } from 'zod';
 
 import {
@@ -31,25 +31,28 @@ export class RemoteWorkServer {
     this.server.use(bodyParser.urlencoded({ extended: true }));
 
     this.setupRoutes();
-    this.server.use((error, req, res: Response, next) => {
-      if (error) {
-        if (error instanceof Error) {
-          return res.status(500).json({ error });
+    this.server.use(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      (error: unknown, _req: unknown, res: Response, _next: NextFunction) => {
+        if (error) {
+          if (error instanceof Error) {
+            res.status(500).json({ error: error.toString() });
+          }
+          console.error('Middleware caught somehting that is not an error');
+          try {
+            const stringified = JSON.stringify(error);
+            console.error('Error = ', stringified);
+          } catch (err) {
+            console.error(
+              'could not stringify error: ',
+              error,
+              ' with error: ',
+              err,
+            );
+          }
         }
-        console.error('Middleware caught somehting that is not an error');
-        try {
-          const stringified = JSON.stringify(error);
-          console.error('Error = ', stringified);
-        } catch (err) {
-          console.error(
-            'could not stringify error: ',
-            error,
-            ' with error: ',
-            err,
-          );
-        }
-      }
-    });
+      },
+    );
   }
 
   getUserWorkSituation(
@@ -80,22 +83,21 @@ export class RemoteWorkServer {
   }
 
   setupRoutes(): void {
-    this.server.get('/user-presence', async (req, res, next) => {
+    this.server.get('/user-presence', async (req, res) => {
       try {
         const { username, date } = getUserPresenceQuerySchema.parse(req.query);
-
         const workSituation = await this.getUserWorkSituation(
           username,
           new Date(date),
         );
-        return res.json({
+        res.json({
           workSituation,
         });
       } catch (error) {
         if (error instanceof ZodError) {
-          return res.status(400).json({ error });
+          res.status(400).json({ error });
         }
-        next(error);
+        throw error;
       }
     });
     this.server.post('/user-presence', async (req, res, next) => {
@@ -106,13 +108,13 @@ export class RemoteWorkServer {
           myBody.date,
           userWorkSituationFromString(myBody.situation),
         );
-        return res.json({ workSituation: workSituation.toObject() });
+        res.json({ workSituation: workSituation.toObject() });
       } catch (error) {
         if (error instanceof ZodError) {
-          return res.status(400).json({ error });
+          res.status(400).json({ error });
         }
         if (error instanceof UserNotFoundError) {
-          return res.status(400).json({ error });
+          res.status(400).json({ error });
         }
         next(error);
       }
@@ -126,10 +128,10 @@ export class RemoteWorkServer {
           body.firstName,
           body.lastName,
         );
-        return res.json({ user: user.toObject() });
+        res.json({ user: user.toObject() });
       } catch (error) {
         if (error instanceof ZodError) {
-          return res.status(400).json({ error });
+          res.status(400).json({ error });
         }
         throw error;
       }
@@ -137,10 +139,10 @@ export class RemoteWorkServer {
     this.server.get('/users', async (req, res) => {
       try {
         const result = await this.getAllUsers();
-        return res.json(result);
+        res.json(result);
       } catch (error) {
         if (error instanceof ZodError) {
-          return res.status(400).json({ error });
+          res.status(400).json({ error });
         }
         throw error;
       }
@@ -152,12 +154,12 @@ export class RemoteWorkServer {
         const user = await this.remoteWorkApp.getUser(query.id);
 
         if (user) {
-          return res.json({ user: user.toObject() });
+          res.json({ user: user.toObject() });
         }
-        return res.sendStatus(404);
+        res.sendStatus(404);
       } catch (error) {
         if (error instanceof ZodError) {
-          return res.status(400).json({ error });
+          res.status(400).json({ error });
         }
         throw error;
       }

@@ -28,9 +28,13 @@
   - create user repository
   - create API addUser
 - 2024-10-15: Finish route GET /users/:id
+
   - check user existence before savePresence
   - list all users
   - add Middleware to catch errors in server.ts
+
+- 2024-10-22:
+  - Migrate to expressjs 5
 
 ## Next steps
 
@@ -39,7 +43,6 @@
 - Cleanup test files
 - Improve middleware to handle known errors
 - Return Promises in repositories
-- Migrate to expressjs 5
 - User can set a presence only for an half-day (AM / PM)
 - unset a user presence
 - get a week presence for one user
