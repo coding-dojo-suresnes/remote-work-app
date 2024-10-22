@@ -37,16 +37,29 @@
   - Migrate to expressjs 5
   - Improve middleware to handle Zod Errors
 
-## Next steps
+## V1 features to develop
 
-- Add login / user base (auth0 or alternative, SSO mandatory)
-- Add database (search a {db}-memory-server for testing)
-- Cleanup test files
-- Improve middleware to handle known errors
-- Return Promises in repositories
-- User can set a presence only for an half-day (AM / PM)
-- unset a user presence
-- get a week presence for one user
-- add a location to the office presence
-- manage locations (desk, floor, building, office address)
-- allow pagination on list all users
+### Backend
+
+- Add login / user base (SSO)
+- Allow only one domain to login
+- add user rights: a user can only set her own presence
+- add database
+- add SiteEntity: a user in office should be in a site. A site is composed of a list of Desks (DeskEntity)
+- saveSite(SiteId, Desk[]): allow to create a new site
+- update savePresence to include site and desk
+- handle desk is occupied
+- savePresence with any free desk
+- get site occupation : returns all the desks with people occupying them
+
+### Frontend
+
+- Add login page
+- show Site occupation page
+- Set presence form
+- get my presence
+
+## Later
+
+- User can set a presence only for an half-day (AM / PM) (after a database has been implemented)
+- Allow manager to accept remote work requests
