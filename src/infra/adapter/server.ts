@@ -100,7 +100,7 @@ export class RemoteWorkServer {
         throw error;
       }
     });
-    this.server.post('/user-presence', async (req, res, next) => {
+    this.server.post('/user-presence', async (req, res) => {
       try {
         const myBody = postUserPresenceBodySchema.parse(req.body);
         const workSituation = await this.saveUserWorkSituation(
@@ -116,7 +116,6 @@ export class RemoteWorkServer {
         if (error instanceof UserNotFoundError) {
           res.status(400).json({ error });
         }
-        next(error);
       }
     });
     this.server.post('/users', async (req, res) => {

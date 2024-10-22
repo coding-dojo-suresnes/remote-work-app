@@ -1,15 +1,20 @@
 import supertest from 'supertest';
 
 import { RemoteWorkApp } from '../src/domain';
+import { IUserPort } from '../src/domain/ports/output/user.port';
+import { UserEntity } from '../src/domain/user.entity';
 import { RemoteWorkServer } from '../src/infra/adapter/server';
 import { UserWorkSituationRepository } from '../src/infra/adapter/user-work-situation.repository';
+import { UserRepository } from '../src/infra/adapter/user.repository';
 
 describe('Rest API server', () => {
   let app: RemoteWorkServer;
+  let userRepo: IUserPort;
 
   beforeEach(() => {
     const repo = new UserWorkSituationRepository();
-    app = new RemoteWorkServer(new RemoteWorkApp(repo));
+    userRepo = new UserRepository();
+    app = new RemoteWorkServer(new RemoteWorkApp(repo, userRepo));
   });
 
   afterEach(() => {
@@ -19,6 +24,7 @@ describe('Rest API server', () => {
   describe('/user-presence', () => {
     it('should save a user presence and retrieve it', async () => {
       const server = app.start();
+      userRepo.persistUser(new UserEntity('wayglem'));
       await supertest(server)
         .post('/user-presence')
         .send(

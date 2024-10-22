@@ -6,6 +6,7 @@ import {
   RemoteWorkApp,
   UserWorkSituation,
 } from '../src/domain';
+import { IUserPort } from '../src/domain/ports/output/user.port';
 
 describe('isUserInOffice', () => {
   beforeEach(() => {
@@ -14,10 +15,14 @@ describe('isUserInOffice', () => {
   it('should return true when user is in-office this day', async () => {
     // arrange
     const userPresencePort = mock<IUserWorkSituationPort>();
+    const userRepositoryMock = mock<IUserPort>();
     userPresencePort.getUserWorkSituation.mockResolvedValueOnce(
       UserWorkSituation.IN_OFFICE,
     );
-    const remoteWorkApp: IRemoteWorkApp = new RemoteWorkApp(userPresencePort);
+    const remoteWorkApp: IRemoteWorkApp = new RemoteWorkApp(
+      userPresencePort,
+      userRepositoryMock,
+    );
     const today = new Date();
     // act
     const inOffice = await remoteWorkApp.isUserInOffice('Elias', today);
@@ -27,7 +32,12 @@ describe('isUserInOffice', () => {
   it('should return false when user not in office this day', async () => {
     // arrange
     const userPresencePort = mock<IUserWorkSituationPort>();
-    const remoteWorkApp: IRemoteWorkApp = new RemoteWorkApp(userPresencePort);
+    const userRepositoryMock = mock<IUserPort>();
+
+    const remoteWorkApp: IRemoteWorkApp = new RemoteWorkApp(
+      userPresencePort,
+      userRepositoryMock,
+    );
     // given user is not in office
     userPresencePort.getUserWorkSituation.mockResolvedValue(
       UserWorkSituation.REMOTE,
@@ -42,7 +52,12 @@ describe('isUserInOffice', () => {
   it('should return false when user not in office this day', async () => {
     // arrange
     const userPresencePort = mock<IUserWorkSituationPort>();
-    const remoteWorkApp: IRemoteWorkApp = new RemoteWorkApp(userPresencePort);
+    const userRepositoryMock = mock<IUserPort>();
+
+    const remoteWorkApp: IRemoteWorkApp = new RemoteWorkApp(
+      userPresencePort,
+      userRepositoryMock,
+    );
     // given user is not in office
     userPresencePort.getUserWorkSituation.mockResolvedValueOnce(
       UserWorkSituation.REMOTE,
@@ -76,7 +91,12 @@ describe('isUserInOffice', () => {
   it('should throw an error when user Presence is undefined', async () => {
     // arrange
     const userPresencePort = mock<IUserWorkSituationPort>();
-    const remoteWorkApp: IRemoteWorkApp = new RemoteWorkApp(userPresencePort);
+    const userRepositoryMock = mock<IUserPort>();
+
+    const remoteWorkApp: IRemoteWorkApp = new RemoteWorkApp(
+      userPresencePort,
+      userRepositoryMock,
+    );
     const today = new Date();
 
     expect(async () => {

@@ -2,13 +2,16 @@ import { mock } from 'jest-mock-extended';
 
 import { DayDate } from './day-date.entity';
 import { IUserWorkSituationPort } from './ports';
+import { IUserPort } from './ports/output/user.port';
 import { RemoteWorkApp } from './remote-work-app';
 import { UserPresence } from './user-presence.entity';
 import { UserWorkSituation } from './user-work-situation.entity';
+import { UserEntity } from './user.entity';
 
 describe('isUserInOffice', () => {
   const mockRepository = mock<IUserWorkSituationPort>();
-  const remoteWorkApp = new RemoteWorkApp(mockRepository);
+  const mockUserRepository = mock<IUserPort>();
+  const remoteWorkApp = new RemoteWorkApp(mockRepository, mockUserRepository);
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -20,6 +23,9 @@ describe('isUserInOffice', () => {
 
     mockRepository.persistUserWeekPresence.mockResolvedValue(
       new UserPresence(username, date, workSituation),
+    );
+    mockUserRepository.getUserByUsername.mockReturnValueOnce(
+      new UserEntity('user'),
     );
     const expectedPresence = new UserPresence(username, date, workSituation);
 
