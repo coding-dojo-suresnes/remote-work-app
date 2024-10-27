@@ -11,7 +11,12 @@ export class DayDate {
 
   private isInvalidDate(): boolean {
     const date = new Date(this.toString());
-    return Number.isNaN(date.getTime());
+    return !(
+      date.getDate() === this.day &&
+      date.getMonth() === this.month - 1 &&
+      date.getFullYear() === this.year &&
+      !Number.isNaN(date.getTime())
+    );
   }
 
   public toString(): string {
@@ -38,7 +43,11 @@ export class DayDate {
   }
 
   public static fromISOZuluString(date: string): DayDate {
-    return DayDate.fromDate(new Date(date));
+    const dayDate = DayDate.fromDate(new Date(date));
+    if (dayDate.toString() !== date.split('T')[0]) {
+      throw new Error('Invalid date');
+    }
+    return dayDate;
   }
 
   public static fromDate(date: Date): DayDate {
