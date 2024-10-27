@@ -4,7 +4,7 @@
 2. Run the game with this command: `yarn start`
 3. Run the tests with this command: `yarn test`
 
-   Any test source matching the pattern `*.test.ts` below `tests/` will be executed.
+   Any test source matching the pattern `*.spec.ts` will be executed.
 
 ## Features
 

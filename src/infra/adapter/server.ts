@@ -136,7 +136,8 @@ export class RemoteWorkServer {
       const user = await this.remoteWorkApp.getUser(query.id);
 
       if (user) {
-        res.json({ user: user.toObject() });
+        res.status(200).json({ user: user.toObject() });
+        return;
       }
       res.sendStatus(404);
     });

@@ -56,19 +56,6 @@ export class RemoteWorkApp implements IRemoteWorkApp {
     );
   }
 
-  public async isUserInOffice(username: string, date: Date): Promise<boolean> {
-    const workSituation: UserWorkSituation =
-      await this.userPresenceRepository.getUserWorkSituation(username, date);
-    switch (workSituation) {
-      case UserWorkSituation.IN_OFFICE:
-        return true;
-      case UserWorkSituation.REMOTE:
-        return false;
-      default:
-        throw new Error('NOT IMPLEMENTED');
-    }
-  }
-
   public async getAllUsers(): Promise<{ users: UserEntity[]; count: number }> {
     const users = await this.userRepository.getAll();
     return { users, count: users.length };
