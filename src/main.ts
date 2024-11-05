@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 import { RemoteWorkApp } from './domain';
 import { RemoteWorkServer } from './infra/adapter/server';
 import { UserWorkSituationRepository } from './infra/adapter/user-work-situation.repository';

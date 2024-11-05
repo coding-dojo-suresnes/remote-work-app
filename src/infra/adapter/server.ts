@@ -1,8 +1,13 @@
+/* eslint-disable no-console */
 /* eslint-disable max-lines-per-function */
 import { Server } from 'http';
 
 import bodyParser from 'body-parser';
+import sqlite3 from 'connect-sqlite3';
 import express, { Express, NextFunction, Response } from 'express';
+import session from 'express-session';
+import passport from 'passport';
+import GoogleStrategy from 'passport-google-oidc';
 import { ZodError } from 'zod';
 import { fromError } from 'zod-validation-error';
 
@@ -18,6 +23,8 @@ import { getUserPresenceQuerySchema, postUserPresenceBodySchema } from './dto';
 import { getUserByIdQuerySchema } from './dto/get-user-by-id-query.dto';
 import { postUserBodySchema } from './dto/post-user-body.dto';
 
+const SQLiteStore = sqlite3(session);
+
 export class RemoteWorkServer {
   private server: Express;
 
@@ -30,6 +37,17 @@ export class RemoteWorkServer {
     this.server = express();
     this.server.use(bodyParser.json());
     this.server.use(bodyParser.urlencoded({ extended: true }));
+    this.server.use(
+      session({
+        secret: 'keyboard cat',
+        resave: false,
+        saveUninitialized: false,
+        store: new SQLiteStore({ db: 'sessions.db', dir: '/tmp' }),
+      }),
+    );
+    this.server.use(passport.authenticate('session'));
+
+    this.setupGoogleStrategy();
 
     this.setupRoutes();
     this.server.use(
@@ -88,7 +106,50 @@ export class RemoteWorkServer {
     return this.remoteWorkApp.getAllUsers();
   }
 
+  setupGoogleStrategy(): void {
+    passport.use(
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call
+      new GoogleStrategy(
+        {
+          clientID: process.env.GOOGLE_CLIENT_ID,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+          callbackURL: 'http://localhost:3000/callback',
+          scope: ['profile', 'email', 'openid'],
+        },
+        (issuer, profile, cb) => cb(null, profile),
+      ),
+    );
+
+    passport.serializeUser((user, cb) => {
+      process.nextTick(() => {
+        // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        cb(null, { id: user.id, username: user.username, name: user.name });
+      });
+    });
+
+    passport.deserializeUser((user, cb) => {
+      process.nextTick(() => cb(null, user as any));
+    });
+  }
+
   setupRoutes(): void {
+    this.server.get('/login/federated/google', passport.authenticate('google'));
+    this.server.get(
+      '/callback',
+      passport.authenticate('google', {
+        successRedirect: '/',
+        failureRedirect: '/login',
+      }),
+    );
+    this.server.get('/logout', (req, res, next) => {
+      req.logout((err) => {
+        if (err) {
+          return next(err);
+        }
+        res.redirect('/');
+      });
+    });
     this.server.get('/user-presence', async (req, res) => {
       const { username, date } = getUserPresenceQuerySchema.parse(req.query);
       const workSituation = await this.getUserWorkSituation(
