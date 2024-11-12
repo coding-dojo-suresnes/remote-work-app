@@ -34,23 +34,37 @@
   - add Middleware to catch errors in server.ts
 
 - 2024-10-22:
+
   - Migrate to expressjs 5
   - Improve middleware to handle Zod Errors
+
+- 2024-11-12
+  - Authentication with Google SSO
 
 ## V1 features to develop
 
 ### Backend
 
-- Add login / user base (SSO)
+- Authentication
+  - user repository
+  - auth middleware
+    - validateJWT()
+    - refreshExpiredRefreshToken()
+    - setNewToken()
+  - save access and refresh tokens in database
+  - on logout, remove token and maybe invalidated tokens
 - Allow only one domain to login
 - add user rights: a user can only set her own presence
-- add database
 - add SiteEntity: a user in office should be in a site. A site is composed of a list of Desks (DeskEntity)
 - saveSite(SiteId, Desk[]): allow to create a new site
 - update savePresence to include site and desk
 - handle desk is occupied
 - savePresence with any free desk
 - get site occupation : returns all the desks with people occupying them
+
+### Database
+
+- Do some magical things, soon(TM)
 
 ### Frontend
 
