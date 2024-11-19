@@ -9,6 +9,7 @@ export default {
   testMatch: ['<rootDir>/**/*.spec.ts'],
   coverageDirectory: 'coverage',
   coverageProvider: 'v8',
+  setupFiles: ['dotenv/config'],
   transform: {
     '^.+\\.tsx?$': 'ts-jest',
   },
