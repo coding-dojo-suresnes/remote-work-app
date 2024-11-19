@@ -41,6 +41,11 @@
 - 2024-11-12
   - Authentication with Google SSO
 
+- 2024-11-19
+  - add dotenv for tests 
+  - auth middleware with our own JWT to be Google agnostic
+    - validateJWT() middleware
+
 ## V1 features to develop
 
 ### Backend
@@ -48,7 +53,6 @@
 - Authentication
   - user repository
   - auth middleware
-    - validateJWT()
     - refreshExpiredRefreshToken()
     - setNewToken()
   - save access and refresh tokens in database

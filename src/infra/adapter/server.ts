@@ -4,9 +4,11 @@
 import { Server } from 'http';
 
 import bodyParser from 'body-parser';
-import express, { Express, NextFunction, Response } from 'express';
+import cookieParser from 'cookie-parser';
+import express, { Express, NextFunction, Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
 import passport from 'passport';
-import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import { Profile, Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { ZodError } from 'zod';
 import { fromError } from 'zod-validation-error';
 
@@ -22,6 +24,16 @@ import { getUserPresenceQuerySchema, postUserPresenceBodySchema } from './dto';
 import { getUserByIdQuerySchema } from './dto/get-user-by-id-query.dto';
 import { postUserBodySchema } from './dto/post-user-body.dto';
 
+interface IRequest extends Request {
+  cookies: { access_token?: string };
+}
+
+function generateAccessToken(profile: Profile): string {
+  return jwt.sign(profile, process.env.JWT_SECRET ?? '', {
+    expiresIn: 60 * 60, // in seconds
+  });
+}
+
 export class RemoteWorkServer {
   private server: Express;
 
@@ -34,6 +46,7 @@ export class RemoteWorkServer {
     this.server = express();
     this.server.use(bodyParser.json());
     this.server.use(bodyParser.urlencoded({ extended: true }));
+    this.server.use(cookieParser());
 
     this.setupGoogleStrategy();
 
@@ -103,26 +116,52 @@ export class RemoteWorkServer {
           callbackURL: 'http://localhost:3000/callback',
           state: false,
         },
-        (accessToken, refreshToken, profile, cb) => {
+        (_accessToken, _refreshToken, profile, cb) => {
           console.log(
             '🚀 ~ RemoteWorkServer ~ setupGoogleStrategy ~ profile:',
             profile,
           );
           console.log(
             '🚀 ~ RemoteWorkServer ~ setupGoogleStrategy ~ refreshToken:',
-            refreshToken,
+            _refreshToken,
           );
+          const accessToken = generateAccessToken(profile);
+          const refreshToken = _refreshToken;
+
           console.log(
             '🚀 ~ RemoteWorkServer ~ setupGoogleStrategy ~ accessToken:',
             accessToken,
           );
-          return cb(null, profile, { accessToken });
+          return cb(null, profile, { accessToken, refreshToken });
         },
       ),
     );
   }
 
+  isAuthenticated(req: IRequest, res: Response, next: NextFunction): void {
+    console.log(req.cookies);
+    const token = req.cookies.access_token;
+    console.log(token);
+    if (!token) {
+      res.status(401).send();
+      return;
+    }
+    try {
+      const decodedToken = jwt.verify(token, process.env.JWT_SECRET ?? '');
+      console.log(decodedToken);
+
+      res.locals.user = decodedToken;
+
+      next();
+    } catch (error) {
+      res.status(401).send();
+    }
+  }
+
   setupRoutes(): void {
+    /**
+     * Go to http://localhost:3000/login/federated/google
+     */
     this.server.get(
       '/login/federated/google',
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
@@ -165,33 +204,42 @@ export class RemoteWorkServer {
         res.redirect('/');
       });
     });
-    this.server.get('/user-presence', async (req, res) => {
-      const { username, date } = getUserPresenceQuerySchema.parse(req.query);
-      const workSituation = await this.getUserWorkSituation(
-        username,
-        new Date(date),
-      );
-      res.json({
-        workSituation,
-      });
-    });
-    this.server.post('/user-presence', async (req, res) => {
-      try {
-        const myBody = postUserPresenceBodySchema.parse(req.body);
-        const workSituation = await this.saveUserWorkSituation(
-          myBody.username,
-          myBody.date,
-          userWorkSituationFromString(myBody.situation),
+
+    this.server.get(
+      '/user-presence',
+      (req, res, next) => this.isAuthenticated(req, res, next),
+      async (req, res) => {
+        const { username, date } = getUserPresenceQuerySchema.parse(req.query);
+        const workSituation = await this.getUserWorkSituation(
+          username,
+          new Date(date),
         );
-        res.json({ workSituation: workSituation.toObject() });
-      } catch (error) {
-        if (error instanceof UserNotFoundError) {
-          res.status(400).json({ error: error.message });
-          return;
+        res.json({
+          workSituation,
+        });
+      },
+    );
+    this.server.post(
+      '/user-presence',
+      (req, res, next) => this.isAuthenticated(req, res, next),
+      async (req, res) => {
+        try {
+          const myBody = postUserPresenceBodySchema.parse(req.body);
+          const workSituation = await this.saveUserWorkSituation(
+            myBody.username,
+            myBody.date,
+            userWorkSituationFromString(myBody.situation),
+          );
+          res.json({ workSituation: workSituation.toObject() });
+        } catch (error) {
+          if (error instanceof UserNotFoundError) {
+            res.status(400).json({ error: error.message });
+            return;
+          }
+          throw error;
         }
-        throw error;
-      }
-    });
+      },
+    );
     this.server.post('/users', async (req, res) => {
       const body = postUserBodySchema.parse(req.body);
 
